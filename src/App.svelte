@@ -1,9 +1,11 @@
 <script>
   import pdfjs from 'pdfjs-dist';
   import pdfjsWorkerEntry from "pdfjs-dist/build/pdf.worker.entry";
+  import printJS from 'print-js';
 
   pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorkerEntry;
 
+  let showPDF = false;
   let pdfContainer;
   let currPage = 1;
   let numPages = 0;
@@ -16,6 +18,8 @@
 
     numPages = thePDF.numPages;
     thePDF.getPage( 1 ).then( handlePages );
+
+    showPDF = true
   }
 
   function handlePages(page) {
@@ -43,12 +47,27 @@
         thePDF.getPage( currPage ).then( handlePages );
     }
   }
+
+  function printPDF() {
+    console.log('printing');
+    printJS('sample.pdf');
+  }
 </script>
 
 <main>
   <button id="pdfButton" on:click={loadPDF}>Load pdf</button>
-  <div bind:this={pdfContainer}>
-
+  <div class="modal" class:is-active={showPDF}>
+    <div class="modal-background" on:click={() => {showPDF = false}}></div>
+    <div class="modal-card">
+      <header  class="modal-card-head">
+        <button class="button" on:click="{printPDF}">Print</button>
+        <div class="modal-card-title">PDF</div>
+        <button class="delete" aria-label="close" on:click={() => {showPDF = false}}></button>
+      </header>
+      <section class="modal-card-body">
+        <div  bind:this={pdfContainer}></div>
+      </section>
+    </div>
   </div>
   <!-- <canvas id="pdf"></canvas> -->
 </main>
@@ -78,5 +97,10 @@
     position: fixed;
     top: 0;
     left: 0;
+  }
+
+  .modal {
+    height: 80%;
+    overflow: auto;
   }
 </style>
