@@ -5,18 +5,21 @@
   pdfjs.GlobalWorkerOptions.workerSrc = pdfjsWorkerEntry;
 
   let pdfContainer;
+  let currPage = 1;
+  let numPages = 0;
+  let thePDF = null;
+
 
   async function loadPDF() {
-    
     const loadingTask = pdfjs.getDocument("sample.pdf");
-    const pdf = await loadingTask.promise;
+    thePDF = await loadingTask.promise;
 
-    // Load information from the first page.
-    const page = await pdf.getPage(1);
+    numPages = thePDF.numPages;
+    thePDF.getPage( 1 ).then( handlePages );
+  }
 
-    const scale = 1;
+  function handlePages(page) {
     const viewport = page.getViewport({scale: 1.0});
-
 
     // Apply page dimensions to the <canvas> element.
     const canvas = document.createElement("canvas");
@@ -29,15 +32,16 @@
       canvasContext: context,
       viewport: viewport
     };
-    await page.render(renderContext);
+    page.render(renderContext);
 
     pdfContainer.appendChild(canvas);
 
-    console.log("Page rendered!");
-  }
-
-  function handlePages(page) {
-    
+    //move to next page
+    currPage++;
+    if ( thePDF !== null && currPage <= numPages )
+    {
+        thePDF.getPage( currPage ).then( handlePages );
+    }
   }
 </script>
 
