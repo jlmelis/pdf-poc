@@ -27,6 +27,7 @@
 
     // Apply page dimensions to the <canvas> element.
     const canvas = document.createElement("canvas");
+    canvas.classList.add('pageCanvas');
     const context = canvas.getContext("2d");
     canvas.height = viewport.height;
     canvas.width = viewport.width;
@@ -50,7 +51,16 @@
 
   function printPDF() {
     console.log('printing');
-    printJS('sample.pdf');
+    //printJS('sample.pdf');
+    //window.print();
+    var iframe = document.createElement('iframe');
+    iframe.src = 'sample.pdf';
+    iframe.style.cssText = "height: 100%; width: 100%";
+
+    document.body.appendChild(iframe);
+
+    iframe.focus();
+    iframe.contentWindow.print();
   }
 </script>
 
@@ -59,13 +69,13 @@
   <div class="modal" class:is-active={showPDF}>
     <div class="modal-background" on:click={() => {showPDF = false}}></div>
     <div class="modal-card">
-      <header  class="modal-card-head">
+      <header  class="modal-card-head noPrint">
         <button class="button" on:click="{printPDF}">Print</button>
         <div class="modal-card-title">PDF</div>
         <button class="delete" aria-label="close" on:click={() => {showPDF = false}}></button>
       </header>
       <section class="modal-card-body">
-        <div  bind:this={pdfContainer}></div>
+        <div id="pdfContainer"  bind:this={pdfContainer}></div>
       </section>
     </div>
   </div>
@@ -99,8 +109,4 @@
     left: 0;
   }
 
-  .modal {
-    height: 80%;
-    overflow: auto;
-  }
 </style>
