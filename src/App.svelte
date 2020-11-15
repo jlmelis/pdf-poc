@@ -52,21 +52,21 @@
   function printPDF() {
     console.log('printing');
     //printJS('sample.pdf');
-    //window.print();
-    var iframe = document.createElement('iframe');
-    iframe.src = 'sample.pdf';
-    iframe.style.cssText = "height: 100%; width: 100%";
+    window.print();
+    // var iframe = document.createElement('iframe');
+    // iframe.src = 'sample.pdf';
+    // iframe.style.cssText = "display: none; height: 100%; width: 100%";
 
-    document.body.appendChild(iframe);
+    // document.body.appendChild(iframe);
 
-    iframe.focus();
-    iframe.contentWindow.print();
+    // iframe.focus();
+    // iframe.contentWindow.print();
   }
 </script>
 
 <main>
-  <button id="pdfButton" on:click={loadPDF}>Load pdf</button>
-  <div class="modal" class:is-active={showPDF}>
+  <button id="pdfButton" class="noPrint" on:click={loadPDF}>Load pdf</button>
+  <!-- <div class="modal" class:is-active={showPDF}>
     <div class="modal-background" on:click={() => {showPDF = false}}></div>
     <div class="modal-card">
       <header  class="modal-card-head noPrint">
@@ -78,8 +78,9 @@
         <div id="pdfContainer"  bind:this={pdfContainer}></div>
       </section>
     </div>
-  </div>
-  <!-- <canvas id="pdf"></canvas> -->
+  </div> -->
+  <button class="button noPrint" on:click="{printPDF}">Print</button>
+  <div id="pdfContainer"  bind:this={pdfContainer}></div>
 </main>
 
 <style>
@@ -102,6 +103,27 @@
 			max-width: none;
 		}
 	}
+
+  @media print {
+    .noPrint {
+      display: none;
+    }
+    .pageCanvas {
+      
+      position: absolute;
+      left: 0;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      width: 100%;
+    }
+    #pdfContainer {
+      max-width: 100%;
+    }
+
+  }
+
+
 
   #pdfButton {
     position: fixed;
