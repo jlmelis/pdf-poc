@@ -25,13 +25,13 @@
   function handlePages(page) {
     const viewport = page.getViewport({scale: 1.0});
 
-    // Apply page dimensions to the <canvas> element.
+    // Apply page dimensions to the <canvas> element.  
     const canvas = document.createElement("canvas");
     canvas.classList.add('pageCanvas');
     const context = canvas.getContext("2d");
     canvas.height = viewport.height;
     canvas.width = viewport.width;
-
+    
     // Render the page into the <canvas> element.
     const renderContext = {
       canvasContext: context,
@@ -49,27 +49,69 @@
     }
   }
 
-  function printPDF() {
+  async function printPDF() {
     console.log('printing');
-    //printJS('sample.pdf');
+    const printContainer = document.getElementById('printContainer');
+    const pages = document.querySelectorAll('.pageCanvas');
+
+    for (const page of pages) {
+      const image = new Image();
+      image.src = await resizedataURL(page.toDataURL("image/png"), page.width * 2, page.height * 2);
+      image.classList.add('pageImg');
+      image.alt = 'pdf page';
+      printContainer.appendChild(image);
+    }
+
     window.print();
-    // var iframe = document.createElement('iframe');
-    // iframe.src = 'sample.pdf';
-    // iframe.style.cssText = "display: none; height: 100%; width: 100%";
-
-    // document.body.appendChild(iframe);
-
-    // iframe.focus();
-    // iframe.contentWindow.print();
+    removeAllChildNodes(printContainer);
   }
+
+  function removeAllChildNodes(parent) {
+    while (parent.firstChild) {
+        parent.removeChild(parent.firstChild);
+    }
+  }
+
+  // Takes a data URI and returns the Data URI corresponding to the resized image at the wanted size.
+function resizedataURL(datas, wantedWidth, wantedHeight){
+    return new Promise(async function(resolve,reject){
+
+        // We create an image to receive the Data URI
+        var img = document.createElement('img');
+
+        // When the event "onload" is triggered we can resize the image.
+        img.onload = function()
+        {        
+            // We create a canvas and get its context.
+            var canvas = document.createElement('canvas');
+            var ctx = canvas.getContext('2d');
+
+            // We set the dimensions at the wanted size.
+            canvas.width = wantedWidth;
+            canvas.height = wantedHeight;
+
+            // We resize the image with the canvas method drawImage();
+            ctx.drawImage(this, 0, 0, wantedWidth, wantedHeight);
+
+            var dataURI = canvas.toDataURL();
+
+            // This is the return of the Promise
+            resolve(dataURI);
+        };
+
+        // We put the Data URI in the image's src attribute
+        img.src = datas;
+
+    })
+}// Use it like : var newDataURI = await resizedataURL('yourDataURIHere', 50, 50);
 </script>
 
 <main>
   <button id="pdfButton" class="noPrint" on:click={loadPDF}>Load pdf</button>
-  <!-- <div class="modal" class:is-active={showPDF}>
-    <div class="modal-background" on:click={() => {showPDF = false}}></div>
-    <div class="modal-card">
-      <header  class="modal-card-head noPrint">
+  <div class="modal noPrint" class:is-active={showPDF}>
+    <div class="modal-background noPrint" on:click={() => {showPDF = false}}></div>
+    <div class="modal-card noPrint">
+      <header  class="modal-card-head">
         <button class="button" on:click="{printPDF}">Print</button>
         <div class="modal-card-title">PDF</div>
         <button class="delete" aria-label="close" on:click={() => {showPDF = false}}></button>
@@ -78,25 +120,11 @@
         <div id="pdfContainer"  bind:this={pdfContainer}></div>
       </section>
     </div>
-  </div> -->
-  <button class="button noPrint" on:click="{printPDF}">Print</button>
-  <div id="pdfContainer"  bind:this={pdfContainer}></div>
+  </div>
+  <div id="printContainer" ></div>
 </main>
 
 <style>
-	main {
-		text-align: center;
-		padding: 1em;
-		max-width: 240px;
-		margin: 0 auto;
-	}
-
-	h1 {
-		color: #ff3e00;
-		text-transform: uppercase;
-		font-size: 4em;
-		font-weight: 100;
-	}
 
 	@media (min-width: 640px) {
 		main {
@@ -108,22 +136,19 @@
     .noPrint {
       display: none;
     }
-    .pageCanvas {
-      
-      position: absolute;
-      left: 0;
-      top: 0;
-      right: 0;
-      bottom: 0;
-      width: 100%;
-    }
-    #pdfContainer {
-      max-width: 100%;
+
+    #printContainer {
+      display: block;
     }
 
+    @page {
+      margin:0cm;
+    }
   }
 
-
+  #printContainer {
+    display: hidden;
+  }
 
   #pdfButton {
     position: fixed;
